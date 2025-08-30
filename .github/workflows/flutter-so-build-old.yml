@@ -1,0 +1,130 @@
+name: Flutter SO Build By ЯK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 8
+
+      - name: Install minimal Android NDK
+        run: |
+          mkdir -p $HOME/android-ndk
+          export ANDROID_NDK_HOME=$HOME/android-ndk
+          wget -q https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip -O ndk.zip
+          unzip -q ndk.zip -d $HOME/android-ndk
+          mv $HOME/android-ndk/android-ndk-r21e $HOME/android-ndk/21.4.7075529
+          export PATH=$ANDROID_NDK_HOME/21.4.7075529:$PATH
+
+      - name: Build & Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          declare -A dart_map=(
+            ["2.16.2"]="2.10.4 2.10.5"
+            ["2.16.1"]="2.10.0 2.10.1 2.10.3"
+            ["2.16.0"]="2.10.0"
+            ["2.15.1"]="2.8.1"
+            ["2.15.0"]="2.8.0"
+            ["2.14.4"]="2.5.3"
+            ["2.14.3"]="2.5.2"
+            ["2.14.2"]="2.5.1"
+            ["2.14.0"]="2.5.0"
+            ["2.13.4"]="2.2.3"
+            ["2.13.3"]="2.2.2"
+            ["2.13.1"]="2.2.1"
+            ["2.13.0"]="2.2.0"
+            ["2.12.3"]="2.0.5 2.0.6"
+            ["2.12.2"]="2.0.3 2.0.4"
+            ["2.12.1"]="2.0.2"
+            ["2.12.0"]="2.0.0 2.0.1"
+            ["2.10.4"]="1.22.4"
+            ["2.10.3"]="1.22.3"
+            ["2.10.2"]="1.22.2"
+            ["2.10.1"]="1.22.1"
+            ["2.10.0"]="1.22.0"
+            ["2.9.2"]="1.20.3 1.20.4"
+            ["2.9.1"]="1.20.2"
+            ["2.9.0"]="1.20.0 1.20.1"
+          )
+
+          echo "## 📦 Flutter SO Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Dart Version | Flutter Versions | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|------------------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          dart_versions=(2.9.0 2.9.1 2.9.2 2.10.0 2.10.1 2.10.2 2.10.3 2.10.4 2.12.0 2.12.1 2.12.2 2.12.3 2.13.0 2.13.1 2.13.3 2.13.4 2.14.0 2.14.2 2.14.3 2.14.4 2.15.0 2.15.1 2.16.0 2.16.1 2.16.2)
+          summary_lines=()
+
+          for dart_ver in "${dart_versions[@]}"; do
+            RELEASE_URL="https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v${dart_ver}"
+            echo "🔍 Checking existing release v${dart_ver}..."
+
+            if gh release view "v${dart_ver}" &>/dev/null; then
+              echo "✅ Release v${dart_ver} already exists, skipping..."
+              summary_lines+=("| ${dart_ver} | ${dart_map[$dart_ver]} | [✅ Already Released](${RELEASE_URL}) |")
+              continue
+            fi
+
+            echo "🚀 Starting build for Dart v${dart_ver}"
+            mkdir -p release/arm64 release/armeabi_v7a
+
+            for flutter_ver in ${dart_map[$dart_ver]}; do
+              echo "⚡ Building Flutter v${flutter_ver}"
+              wget -q https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${flutter_ver}-stable.tar.xz
+              tar xf flutter_linux_${flutter_ver}-stable.tar.xz
+              export PATH=$PWD/flutter/bin:$PATH
+
+              flutter create flutter_so >/dev/null
+              cd flutter_so
+              flutter pub get
+              echo "ndk.dir=$HOME/android-ndk/21.4.7075529" > android/local.properties
+              flutter build apk --target-platform android-arm,android-arm64
+              cd ..
+
+              BASE_PATH="flutter_so/build/app/intermediates/stripped_native_libs"
+              SO_ARM64=$(find "$BASE_PATH" -path "*/arm64-v8a/libflutter.so" -print -quit)
+              SO_ARMEABI=$(find "$BASE_PATH" -path "*/armeabi-v7a/libflutter.so" -print -quit)
+
+              mkdir -p "release/arm64/Flutter SO [v${flutter_ver}]"
+              mkdir -p "release/armeabi_v7a/Flutter SO [v${flutter_ver}]"
+              cp "$SO_ARM64" "release/arm64/Flutter SO [v${flutter_ver}]/libflutter.so"
+              cp "$SO_ARMEABI" "release/armeabi_v7a/Flutter SO [v${flutter_ver}]/libflutter.so"
+
+              rm -rf flutter flutter_so flutter_linux_${flutter_ver}-stable.tar.xz
+            done
+
+            flutter_list=$(echo ${dart_map[$dart_ver]} | sed 's/ /, /g')
+
+            cd release
+            cd arm64 && zip -qr ../libflutter_so_arm64.zip . && cd ..
+            cd armeabi_v7a && zip -qr ../libflutter_so_armeabi_v7a.zip . && cd ..
+            gh release create "v${dart_ver}" \
+              libflutter_so_arm64.zip \
+              libflutter_so_armeabi_v7a.zip \
+              --title "Dart v${dart_ver}" \
+              --notes "Dart v${dart_ver} 𒁍 Flutter Versions: ${flutter_list}"
+            cd ..
+            rm -rf release
+
+            summary_lines+=("| ${dart_ver} | ${flutter_list} | [🎉 Released](${RELEASE_URL}) |")
+          done
+
+          for (( idx=${#summary_lines[@]}-1 ; idx>=0 ; idx-- )); do
+              echo "${summary_lines[idx]}" >> $GITHUB_STEP_SUMMARY
+          done
