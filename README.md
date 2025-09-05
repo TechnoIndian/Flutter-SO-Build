@@ -15,9 +15,9 @@
 
 # Info
 
-**🚀 Dart Version: 𒁍 2.9.0 ➢ 3.9.0**
+**🚀 Dart Version: 𒁍 2.9.0 ➢ 3.9.2**
 
-**🚀 Flutter Version: 𒁍 1.20.0 ➢ 3.35.2**
+**🚀 Flutter Version: 𒁍 1.20.0 ➢ 3.35.3**
 
 
 # More Info
