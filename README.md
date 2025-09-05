@@ -31,6 +31,7 @@
 
 | Dart Version | Flutter Versions | Status |
 |-------------|------------------|--------|
+| 3.9.2 | 3.35.3 | [Released](https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v3.9.2) |
 | 3.9.0 | 3.35.0, 3.35.1, 3.35.2 | [Released](https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v3.9.0) |
 | 3.8.1 | 3.32.1, 3.32.2, 3.32.3, 3.32.4, 3.32.5, 3.32.6, 3.32.7, 3.32.8 | [Released](https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v3.8.1) |
 | 3.8.0 | 3.32.0 | [Released](https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v3.8.0) |
