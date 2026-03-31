@@ -26,6 +26,20 @@
 
 [![Flutter](https://img.shields.io/badge/Flutter-%2302569B?style=for-the-badge&logo=flutter&logoColor=white)](https://docs.flutter.dev/install/archive)
 
+
+Find Dart Version
+-------
+**Find Stable Version in `libflutter.so` : `Use MT Manager Text Editor`**
+
+**With String**
+
+     (stable)
+
+**With Regex**
+
+    \d+\.\d+\.\d+ \(stable\)
+
+
 📦 Flutter SO Build Summary
 -------
 
