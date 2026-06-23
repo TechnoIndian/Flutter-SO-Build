@@ -45,6 +45,9 @@ Find Dart Version
 
 | Dart Version | Flutter Versions | Status |
 |-------------|------------------|--------|
+| 3.12.2 | 3.44.2, 3.44.3 | [Released](https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v3.12.2) |
+| 3.12.1 | 3.44.1 | [Released](https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v3.12.1) |
+| 3.12.0 | 3.44.0 | [Released](https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v3.12.0) |
 | 3.11.5 | 3.41.7, 3.41.8, 3.41.9 | [Released](https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v3.11.5) |
 | 3.11.4 | 3.41.6 | [Released](https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v3.11.4) |
 | 3.11.3 | 3.41.5 | [Released](https://github.com/TechnoIndian/Flutter-SO-Build/releases/tag/v3.11.3) |
